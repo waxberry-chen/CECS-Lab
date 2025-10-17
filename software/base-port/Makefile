@@ -11,7 +11,7 @@ LD 			= $(CROSS_COMPILE)ld
 OBJ_DUMP 	= $(CROSS_COMPILE)objdump
 OBJ_COPY 	= $(CROSS_COMPILE)objcopy
 
-# include 
+# include
 WORK_DIR  = $(abspath .)
 INC_PATH = -I$(WORK_DIR)/include
 INC_PATH += -I$(BASE_PORT)/base/include
@@ -36,8 +36,11 @@ COLOR_GREEN 		= \033[1;32m
 COLOR_YELLOW 		= \033[33m
 COLOR_NONE  		= \033[0m
 
-# Compile C to object file
+# Compile C to object file (pattern rule)
 ## Lab1 TODO: add C compile rule
+$(TAR_DIR)/%.o: %.c
+	@mkdir -p $(dir $@) && echo "$(COLOR_YELLOW)[CC]$(COLOR_NONE) $<"
+	@$(CC) $(CFLAGS) -c -o $@ $(realpath $<)
 
 # Compile assembly to object file
 $(TAR_DIR)/%.o: %.S
@@ -54,8 +57,8 @@ $(IMAGE).elf: $(OBJS) $(LIBS)
 	@echo "$(COLOR_YELLOW)[LD]$(COLOR_NONE) build/$(notdir $@)" 
 	@$(LD) $(LDFLAGS) -o $@ --start-group $(LINKAGE) --end-group
 ## Lab1 TODO: add disassemble command here
-	
 	@$(OBJ_COPY) -O binary $@ $(IMAGE).bin
+	@$(OBJ_DUMP) -d $@ > $(IMAGE).txt 
 
 image: $(IMAGE).elf
 
