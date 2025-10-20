@@ -40,7 +40,10 @@ uint64_t g_nr_guest_inst = 0;
 // simulate a single cycle
 void single_cycle() {
 // Lab2 TODO: implement the single cycle function of your cpu
-
+  dut->clk = 1;
+  dut->eval();
+  dut->clk = 0;
+  dut->eval();
   // m_trace->dump(sim_time++); 
   if(dut->commit_wb == 1) set_state();
 }
