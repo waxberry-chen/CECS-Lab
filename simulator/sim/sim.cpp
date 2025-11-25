@@ -15,15 +15,15 @@ extern VerilatedVcdC *m_trace;
 
 extern uint8_t pmem[];
 
-void print_itrace();
-void difftest_step();
-
 // Lab2 HINT: instruction log struct for instruction trace
 typedef struct {
   word_t pc;
   word_t inst;
   char asm_buf[128];
 } inst_log;
+
+void print_itrace(inst_log *inst_log, VCPU *dut);
+void difftest_step();
 
 void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 
@@ -89,10 +89,7 @@ void cpu_exec(unsigned int n){
   bool npc_cpu_uncache_pre = 0;
   while (n--) {
     #ifdef CONFIG_ITRACE
-    inst_log.pc = dut->pc_cur;
-    inst_log.inst = dut->inst;
-    disassemble(inst_log.asm_buf, sizeof(inst_log.asm_buf), inst_log.pc, (uint8_t *)&inst_log.inst, 4);
-    printf("0x%08x: %08x\t%s\n", inst_log.pc, inst_log.inst, inst_log.asm_buf);
+    print_itrace(&inst_log, dut);
     #endif
     // execute single instruction
     if(test_break()) {
@@ -175,6 +172,10 @@ void isa_reg_display() {
   }
 }
 
-void print_itrace() {
+void print_itrace(inst_log *inst_log, VCPU *dut) {
   // Lab2 HINT: you can implement this function to help you print the instruction trace
+  inst_log->pc = dut->pc_cur;
+  inst_log->inst = dut->inst;
+  disassemble(inst_log->asm_buf, sizeof(inst_log->asm_buf), inst_log->pc, (uint8_t *)&inst_log->inst, 4);
+  printf("0x%08x: %08x\t%s\n", inst_log->pc, inst_log->inst, inst_log->asm_buf);
 }
