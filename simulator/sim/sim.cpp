@@ -19,10 +19,13 @@ void print_itrace();
 void difftest_step();
 
 // Lab2 HINT: instruction log struct for instruction trace
-struct inst_log{
+typedef struct {
   word_t pc;
   word_t inst;
-};
+  char asm_buf[128];
+} inst_log;
+
+void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 
 
 uint32_t *cpu_mstatus = NULL, *cpu_mtvec = NULL, *cpu_mepc = NULL, *cpu_mcause = NULL;
@@ -82,9 +85,15 @@ void cpu_exec(unsigned int n){
     default: sim_state.state = SIM_RUNNING;
   }
   // Lab2 TODO: implement instruction trace for your cpu
-
+  inst_log inst_log;
   bool npc_cpu_uncache_pre = 0;
   while (n--) {
+    #ifdef CONFIG_ITRACE
+    inst_log.pc = dut->pc_cur;
+    inst_log.inst = dut->inst;
+    disassemble(inst_log.asm_buf, sizeof(inst_log.asm_buf), inst_log.pc, (uint8_t *)&inst_log.inst, 4);
+    printf("0x%08x: %08x\t%s\n", inst_log.pc, inst_log.inst, inst_log.asm_buf);
+    #endif
     // execute single instruction
     if(test_break()) {
       // set the end state

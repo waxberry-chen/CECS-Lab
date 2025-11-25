@@ -36,12 +36,22 @@ static int cmd_c(char *args) {
 
 static int cmd_q(char *args) {
   // Lab2 TODO: implement the quit command
-  return 0;
+  sim_state.state = SIM_QUIT;
+  return -1;
 }
 
 static int cmd_si(char *args) {
   char *arg = strtok(NULL, " ");
   // Lab2 TODO: implement the si [N] command
+  long steps;
+  if (arg == NULL) {
+    steps = 1;
+  } else {
+    char *endptr;
+    steps = strtol(args, &endptr, 10);
+  }
+  cpu_exec(steps);
+  printf("si: %ld steps executed\n", steps);
   return 0;
 }
 
@@ -53,7 +63,7 @@ static int cmd_info(char *args) {
   } 
   else if(strcmp(arg, "r") == 0) {
   // Lab2 TODO: implement the info r command
-
+    isa_reg_display();
   } 
   else {
     printf("Usage: info r\n");
@@ -113,6 +123,7 @@ static struct {
   { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
+  { "exit", "Exit NEMU", cmd_q },
   { "si", "Excute several steps", cmd_si },
   { "info", "Print the info of rigisters(r)", cmd_info },
   { "x", "Scan the mem", cmd_x },

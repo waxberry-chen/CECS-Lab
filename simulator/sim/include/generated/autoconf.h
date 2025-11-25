@@ -44,3 +44,6 @@
 #define CONFIG_PMEM_GARRAY 1
 
 #define CONFIG_FFB_ADDR 0xa2000000
+
+// User add 
+#define CONFIG_ITRACE 1
