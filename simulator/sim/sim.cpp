@@ -12,7 +12,6 @@ using namespace std;
 extern VCPU *dut;
 extern uint64_t sim_time;
 extern VerilatedVcdC *m_trace;
-
 extern uint8_t pmem[];
 
 // Lab2 HINT: instruction log struct for instruction trace
@@ -89,8 +88,11 @@ void cpu_exec(unsigned int n){
   bool npc_cpu_uncache_pre = 0;
   while (n--) {
     #ifdef CONFIG_ITRACE
-    print_itrace(&inst_log, dut);
+    if(n < CONFIG_ITRACE_MAX_INST){
+      print_itrace(&inst_log, dut);
+    }
     #endif
+    
     // execute single instruction
     if(test_break()) {
       // set the end state
@@ -105,7 +107,8 @@ void cpu_exec(unsigned int n){
         difftest_sync();
       }
       // Lab3 TODO: use difftest_step function here to execute difftest
-      
+      difftest_step();
+  
       g_nr_guest_inst++;
       npc_cpu_uncache_pre = dut->uncache_read_wb;
     }

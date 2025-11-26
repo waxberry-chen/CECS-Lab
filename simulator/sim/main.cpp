@@ -24,6 +24,7 @@ int main(int argc, char** argv, char** env) {
     printf(ANSI_FG_GREEN "Load img: %s\n" ANSI_NONE, argv[1]);
     
     uint64_t size = load_img(argv[1]);
+    // here nemu iso
     init_difftest(argv[2], size, 1234);
 #ifdef DEVICE
     if (argc == 5) init_device(argv[4]);

@@ -20,6 +20,13 @@ static int skip_dut_nr_inst = 0;
 extern uint8_t pmem[];
 static uint8_t ref_pmem[CONFIG_MSIZE];
 
+static const char *regs[] = {
+  "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
+  "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
+  "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
+  "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
+};
+
 // this is used to let ref skip instructions which
 // can not produce consistent behavior with NEMU
 void difftest_skip_ref() {
@@ -76,10 +83,17 @@ void difftest_sync(){
 bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   // check gpr
   // Lab3 TODO: implement the regfile check function, return false if any difference, and output some infomation of the difference
-
+  for (int i=0; i < 32; i++) {
+    if (sim_cpu.gpr[i] != ref_r->gpr[i]) {
+      printf(ANSI_BG_RED "DIFFTEST: gpr[%d] (%s) = 0x" FMT_WORD " (dut)" 
+      FMT_WORD " (nemu)" ANSI_NONE, i, regs[i], sim_cpu.gpr[i], ref_r->gpr[i]);
+    }
+  }
   // check pc
   // Lab3 TODO: implement the pc check function, return false if any difference, and output some infomation of the difference
-
+  if (sim_cpu.pc != ref_r->pc) {
+    printf(ANSI_BG_RED "DIFFTEST: pc = 0x" FMT_WORD " (dut.pc)" FMT_WORD " (nemu.pc)" ANSI_NONE, sim_cpu.pc, ref_r->pc);
+  }
   const char *csr_names[] = {"mepc", "mstatus", "mcause", "mtvec"};
   // check csr
   // Lab4 TODO: (In Lab3, you can ignore this part.)implement the csr check function, return false if any difference, and output some infomation of the difference

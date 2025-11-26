@@ -47,3 +47,4 @@
 
 // User add 
 #define CONFIG_ITRACE 1
+#define CONFIG_ITRACE_MAX_INST 10

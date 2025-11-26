@@ -30,6 +30,9 @@ IMAGE ?= $(BUILD_DIR)/$(NAMES)-riscv32
 TAR_DIR = $(BUILD_DIR)/riscv32
 OBJS = $(addprefix $(TAR_DIR)/, $(addsuffix .o, $(basename $(SRCS))))
 
+# Arguments pass to dut
+ARGS ?= -b
+
 # Colors
 COLOR_RED   		= \033[1;31m
 COLOR_GREEN 		= \033[1;32m
