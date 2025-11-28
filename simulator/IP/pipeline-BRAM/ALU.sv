@@ -40,17 +40,15 @@ module ALU(
     always_comb begin
         case(alu_op) 
         `ADD:                   result = sr1 + sr2;
-        // Lab3 TODO: finish the following cases
-
-        // `SUB:                   result = 
-        // `AND:                   result = 
-        // `SLT:                   result = 
-        // `SLTU:                  result = 
-        // `OR:                    result = 
-        // `XOR:                   result = 
-        // `SLL:                   result = 
-        // `SRL:                   result = 
-        // `SRA:                   result = 
+        `SUB:                   result = sr1 - sr2;
+        `AND:                   result = sr1 & sr2;
+        `SLT:                   result = ($signed(sr1) < $signed(sr2))? 32'b1: 32'b0;
+        `SLTU:                  result = (sr1 < sr2)? 32'b1: 32'b0;
+        `OR:                    result = sr1 | sr2;
+        `XOR:                   result = sr1 ^ sr2;
+        `SLL:                   result = (sr1 << sr2[4:0]);
+        `SRL:                   result = (sr1 >> sr2{4:0});
+        `SRA:                   result = ($signed(sr1) >>> sr2[4:0]);       
         `MUL:                   result = result_64[31:0];
         `MULH, `MULHSU, `MULHU: result = result_64[63:32];
         `DIV, `DIVU:            result = sr2 == 0 ? -1 : result_div;

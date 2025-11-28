@@ -8,6 +8,7 @@ module Branch(
     output logic [ 0:0] jump,
     output logic [31:0] jump_target
 );
+    // decoder related
     wire is_branch = br_type[4] && !br_type[3];
     wire is_jal    = br_type[4] && br_type[3] && br_type[2];
     wire is_jalr   = br_type[4] && br_type[3] && !br_type[2];
@@ -16,11 +17,11 @@ module Branch(
             case(br_type[2:0])
             `BEQ: jump = sr1 == sr2;
             // Lab3 TODO: implement other branch instructions
-            // `BNE: jump = 
-            // `BLT: jump = 
-            // `BGE: jump = 
-            // `BLTU: jump = 
-            // `BGEU: jump = 
+            `BNE: jump = sr1 != sr2;
+            `BLT: jump = $signed(sr1) < $signed(sr2);
+            `BGE: jump = $signed(sr1) > $signed(sr2);
+            `BLTU: jump = sr1 < sr2;
+            `BGEU: jump = sr1 > sr2;
             default: jump = 0;
             endcase
         end
