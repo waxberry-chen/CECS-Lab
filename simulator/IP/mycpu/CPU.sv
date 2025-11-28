@@ -62,16 +62,16 @@ module
         .imm_type(imm_type),
         .alu_src0_sel(alu_src0_sel),
         .alu_src1_sel(alu_src1_sel),
-        .alu_ctrl(alu_ctrl),
-        .br_type(br_type),
-        .br_en(br_en),
-        .jal(jal),
+        .alu_ctrl(alu_ctrl),            // to alu
+        .br_type(br_type),              // branch type
+        .br_en(br_en),                  // branch enable
+        .jal(jal),                      // to pc_sel
         .jalr(jalr),
-        .rf_we(rf_we),
-        .rf_wd_sel(rf_wd_sel),
-        .dm_type(dm_type),
-        .dm_we_raw(dm_we_raw),
-        .dm_re_raw(dm_re)
+        .rf_we(rf_we),                  // regfile
+        .rf_wd_sel(rf_wd_sel),          // regfile write select
+        .dm_type(dm_type),              // to d-cache
+        .dm_we_raw(dm_we_raw),          // d-cache & putchar
+        .dm_re_raw(dm_re)               // to d-cache
     );
 
     assign rf_ra0 = inst[19 : 15];
