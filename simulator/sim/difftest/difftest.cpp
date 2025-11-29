@@ -87,12 +87,14 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
     if (sim_cpu.gpr[i] != ref_r->gpr[i]) {
       printf(ANSI_BG_RED "DIFFTEST: gpr[%d] (%s) = 0x" FMT_WORD " (dut) " 
       FMT_WORD " (nemu)" ANSI_NONE "\n", i, regs[i], sim_cpu.gpr[i], ref_r->gpr[i]);
+      return false;
     }
   }
   // check pc
   // Lab3 TODO: implement the pc check function, return false if any difference, and output some infomation of the difference
   if (sim_cpu.pc != ref_r->pc) {
     printf(ANSI_BG_RED "DIFFTEST: pc = 0x" FMT_WORD " (dut.pc)" FMT_WORD " (nemu.pc)" ANSI_NONE, sim_cpu.pc, ref_r->pc);
+    return false;
   }
   const char *csr_names[] = {"mepc", "mstatus", "mcause", "mtvec"};
   // check csr
@@ -132,7 +134,7 @@ void difftest_step() {
   CPU_state ref_r;
   difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);
   // difftest_memcpy(CONFIG_MBASE, ref_pmem, CONFIG_MSIZE, DIFFTEST_TO_DUT);
-  checkregs(&ref_r, sim_cpu.pc);
   difftest_exec(1);
+  checkregs(&ref_r, sim_cpu.pc);
   // checkmem(ref_pmem, sim_cpu.pc);
 }

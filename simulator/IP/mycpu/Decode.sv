@@ -32,10 +32,10 @@ module Decode(
             imm         = {inst[31:12], 12'b0};
             mem_access  = `NO_ACCESS;
             alu_op      = `ADD;
-            rf_we       = 0;
+            rf_we       = |rd;
             alu_rs1_sel = `SRC1_PC;
             alu_rs2_sel = `SRC2_IMM;
-            wb_rf_sel   = `FROM_ALU
+            wb_rf_sel   = `FROM_ALU;
             br_type     = {2'b0, funct3};
         end
         'h6f: begin
@@ -52,10 +52,10 @@ module Decode(
         'h67: begin
             // jalr, I_TYPE
             // Lab3 TODO: finish jalr instruction decode
-            imm         = {{20{inst[31]}}, inst[31:20]};
+            imm         = {{20{inst[31]}}, inst[31:21], 1'b0};
             mem_access  = `NO_ACCESS;
             alu_op      = `ADD;
-            rf_we       = `SRC;
+            rf_we       = |rd;
             alu_rs1_sel = `SRC1_PC;
             alu_rs2_sel = `SRC2_FOUR;
             wb_rf_sel   = `FROM_ALU;
@@ -110,14 +110,14 @@ module Decode(
             // Lab3 TODO: finish R_TYPE instruction decode
             imm         = 32'b0;
             mem_access  = `NO_ACCESS;
-            alu_op      = {inst[31], inst[25], inst[2:0]}
+            alu_op      = {inst[30], inst[25], inst[14:12]};
             rf_we       = |rd;
             alu_rs1_sel = `SRC1_REG1;
             alu_rs2_sel = `SRC2_REG2;
             wb_rf_sel   = `FROM_ALU;
             br_type     = 5'b0;
         end
-        'h73: begin
+        //'h73: begin
             // CSR instruction
             // Lab4 TODO: finish CSR instruction decode
 
@@ -129,7 +129,7 @@ module Decode(
             // alu_rs2_sel = 
             // wb_rf_sel   = 
             // br_type     = 
-        end
+        //end
         default: begin
             imm         = 0;
             mem_access  = 0;

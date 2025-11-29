@@ -19,9 +19,9 @@ module Branch(
             // Lab3 TODO: implement other branch instructions
             `BNE: jump = sr1 != sr2;
             `BLT: jump = $signed(sr1) < $signed(sr2);
-            `BGE: jump = $signed(sr1) > $signed(sr2);
+            `BGE: jump = $signed(sr1) >= $signed(sr2);
             `BLTU: jump = sr1 < sr2;
-            `BGEU: jump = sr1 > sr2;
+            `BGEU: jump = sr1 >= sr2;
             default: jump = 0;
             endcase
         end

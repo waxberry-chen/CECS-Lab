@@ -47,7 +47,7 @@ module ALU(
         `OR:                    result = sr1 | sr2;
         `XOR:                   result = sr1 ^ sr2;
         `SLL:                   result = (sr1 << sr2[4:0]);
-        `SRL:                   result = (sr1 >> sr2{4:0});
+        `SRL:                   result = (sr1 >> sr2[4:0]);
         `SRA:                   result = ($signed(sr1) >>> sr2[4:0]);       
         `MUL:                   result = result_64[31:0];
         `MULH, `MULHSU, `MULHU: result = result_64[63:32];

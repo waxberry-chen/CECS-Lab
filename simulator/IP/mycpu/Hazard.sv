@@ -72,6 +72,8 @@ module Hazard(
     wire is_load_ex = mem_access_ex[`LOAD_BIT];     // mem_access  = {2'b01, funct3}
     always_comb begin
         // Lab3 TODO: generate stall_by_load_use and flush_by_load_use
+        stall_by_load_use = ((rf_rd_ex == rf_rs1_id) || (rf_rd_ex == rf_rs2_id)) && is_load_ex;
+        flush_by_load_use = stall_by_load_use;
     end
 
     // control hazard
@@ -80,20 +82,20 @@ module Hazard(
     // Lab4 TODO: generate ecall and mret flush signal
 
     // Lab3 TODO: generate pc_set, IF1_IF2_flush, IF2_ID_flush, ID_EX_flush, EX_LS_flush, LS_WB_flush
-    // assign pc_set           = 
-    // assign IF1_IF2_flush    = 
-    // assign IF2_ID_flush     = 
-    // assign ID_EX_flush      = 
-    // assign EX_LS_flush      = 
-    // assign LS_WB_flush      = 
+    assign pc_set           = jump;
+    assign IF1_IF2_flush    = jump;
+    assign IF2_ID_flush     = jump;
+    assign ID_EX_flush      = flush_by_load_use || jump;
+    assign EX_LS_flush      = 0;
+    assign LS_WB_flush      = 0;    // affect top->pc_cur
 
     // Lab3 TODO: generate pc_stall, IF1_IF2_stall, IF2_ID_stall, ID_EX_stall, EX_LS_stall, LS_WB_stall
-    // assign pc_stall         = 
-    // assign IF1_IF2_stall    = 
-    // assign IF2_ID_stall     = 
-    // assign ID_EX_stall      = 0;
-    // assign EX_LS_stall      = 0;
-    // assign LS_WB_stall      = 0;
+    assign pc_stall         = stall_by_load_use;
+    assign IF1_IF2_stall    = stall_by_load_use;
+    assign IF2_ID_stall     = stall_by_load_use;
+    assign ID_EX_stall      = 0;
+    assign EX_LS_stall      = 0;
+    assign LS_WB_stall      = 0;
 
     always_comb begin
         pc_set_target = jump_target;

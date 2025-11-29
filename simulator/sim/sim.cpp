@@ -90,9 +90,9 @@ void cpu_exec(unsigned int n){
   bool npc_cpu_uncache_pre = 0;
   while (n--) {
     #ifdef CONFIG_ITRACE
-    if(n < CONFIG_ITRACE_MAX_INST){
+    //if(n < CONFIG_ITRACE_MAX_INST){
       print_itrace(&inst_log, dut);
-    }
+    //}
     #endif
     
     // execute single instruction

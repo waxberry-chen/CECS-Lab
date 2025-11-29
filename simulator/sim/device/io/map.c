@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include "debug.h"
 #include "device/map.h"
+#include "common.h"
 #include <stdlib.h>
 
 #define IO_SPACE_MAX (2 * 1024 * 1024)
@@ -21,6 +22,7 @@ uint8_t* new_space(int size) {
 
 static bool check_bound(IOMap *map, paddr_t addr) {
   if (map == NULL || addr > map->high || addr < map->low) {
+    printf(ANSI_BG_RED "check_bound: addr=0x%08x out of bound" ANSI_NONE "\n", addr);
     sim_state.state = SIM_ABORT;
     return false;
   } 
