@@ -1,101 +1,59 @@
-// alu_ctrl: {funct7[5], funct7[0], funct3}
-
-module
-    ALU (
-        input                   [31 : 0]        alu_src0, alu_src1,
-        input                   [4 : 0]         alu_ctrl,
-
-        output      reg         [31 : 0]        alu_res
-    );
-
-    reg         [63 : 0]        mul_res;
-    always @(*) begin
-        mul_res = 64'H0;
-        alu_res = 32'H0;
-        case(alu_ctrl)
-            5'B00000:                                                          // add
-                alu_res = alu_src0 + alu_src1;
-            5'B10000:                                                          // sub
-                alu_res = alu_src0 - alu_src1;
-            5'B00001:                                                          // sll
-                alu_res = alu_src0 << alu_src1[4 : 0];
-            5'B00010:                                                          // slt
-                alu_res = {31'H0, $signed(alu_src0) < $signed(alu_src1)};
-            5'B00011:                                                          // sltu
-                alu_res = {31'H0, alu_src0 < alu_src1};
-            5'B00100:                                                          // xor
-                alu_res = alu_src0 ^ alu_src1;
-            5'B00101:                                                          // srl
-                alu_res = alu_src0 >> alu_src1[4 : 0];
-            5'B10101:                                                          // sra
-                alu_res = $signed(alu_src0) >>> alu_src1[4 : 0];
-            5'B00110:                                                          // or
-                alu_res = alu_src0 | alu_src1;
-            5'B00111:                                                          // and
-                alu_res = alu_src0 & alu_src1;
-            5'B01000: begin                                                    // mul
-                mul_res = alu_src0 * alu_src1;
-                alu_res = mul_res[31: 0];
-            end
-            5'B01001: begin                                                    // mulh
-                mul_res = $signed(alu_src0) * $signed(alu_src1);
-                alu_res = mul_res[63: 32];
-            end
-            5'B01010: begin                                                    // mulhsu
-                if(alu_src0 >= 32'H80000000) begin
-                    mul_res = alu_src0 * alu_src1 - alu_src1 * 33'H100000000;
-                end
-                else begin
-                    mul_res = alu_src0 * alu_src1;
-                end
-                alu_res = mul_res[63: 32];
-            end
-            5'B01011: begin                                                    // mulhu
-                mul_res = alu_src0 * alu_src1;
-                alu_res = mul_res[63: 32];
-            end
-            5'B01100: begin                                                    // div
-                if(alu_src1 == 0) begin
-                    alu_res = 32'HFFFFFFFF;
-                end
-                else if(alu_src0 == 32'H80000000 && alu_src1 == 32'HFFFFFFFF) begin
-                    alu_res = 32'H80000000;
-                end
-                else begin
-                    alu_res = $signed(alu_src0) / $signed(alu_src1);
-                end
-            end
-            5'B01101: begin                                                    // divu
-                if(alu_src1 == 0) begin
-                    alu_res = 32'HFFFFFFFF;
-                end
-                else begin
-                    alu_res = alu_src0 / alu_src1;
-                end
-            end
-            5'B01110: begin                                                    // rem
-                if(alu_src1 == 0) begin
-                    alu_res = alu_src0;
-                end
-                else begin
-                    alu_res = $signed(alu_src0) % $signed(alu_src1);
-                end
-            end
-            5'B01111: begin                                                    // remu
-                if(alu_src1 == 0) begin
-                    alu_res = alu_src0;
-                end
-                else begin
-                    alu_res = alu_src0 % alu_src1;
-                end
-            end
-            5'B11000:                                                          // alu_src1
-                alu_res = alu_src1;
-            default: begin
-                mul_res = 64'H0;
-                alu_res = 32'H0;
-            end
+`include "./include/config.sv"
+module ALU(
+    input  logic [31:0] sr1,
+    input  logic [31:0] sr2,
+    input  logic [ 4:0] alu_op,
+    output logic [31:0] result
+);
+    logic [63:0] result_64;
+    // multiply
+    always_comb begin
+        case(alu_op)
+        `MUL:    result_64 = {{32{sr1[31]}}, sr1} * {{32{sr2[31]}}, sr2};
+        `MULH:   result_64 = {{32{sr1[31]}}, sr1} * {{32{sr2[31]}}, sr2};
+        `MULHSU: result_64 = {{32{sr1[31]}}, sr1} * {32'b0, sr2}; 
+        `MULHU:  result_64 = {32'b0, sr1} * {32'b0, sr2};
+        default: result_64 = 0;
         endcase
     end
-
+    // divide, remainder
+    logic   [31:0] result_div, result_rem;
+    wire     [1:0] sign     = {sr1[31] ^ sr2[31], sr1[31]};
+    wire    [31:0] sr1_abs  = sr1[31] ? -sr1 : sr1;
+    wire    [31:0] sr2_abs  = sr2[31] ? -sr2 : sr2;
+    always_comb begin
+        case(alu_op)
+        `DIV, `REM: begin
+            result_div = sign[1] ? -(sr1_abs / sr2_abs) : sr1_abs / sr2_abs;
+            result_rem = sign[0] ? -(sr1_abs % sr2_abs) : sr1_abs % sr2_abs;
+        end
+        `DIVU, `REMU: begin
+            result_div = sr1 / sr2;
+            result_rem = sr1 % sr2;
+        end
+        default: begin
+            result_div = 0;
+            result_rem = 0;
+        end
+        endcase
+    end
+    always_comb begin
+        case(alu_op) 
+        `ADD:                   result = sr1 + sr2;
+        `SUB:                   result = sr1 - sr2;
+        `AND:                   result = sr1 & sr2;
+        `SLT:                   result = ($signed(sr1) < $signed(sr2))? 32'b1: 32'b0;
+        `SLTU:                  result = (sr1 < sr2)? 32'b1: 32'b0;
+        `OR:                    result = sr1 | sr2;
+        `XOR:                   result = sr1 ^ sr2;
+        `SLL:                   result = (sr1 << sr2[4:0]);
+        `SRL:                   result = (sr1 >> sr2{4:0});
+        `SRA:                   result = ($signed(sr1) >>> sr2[4:0]);       
+        `MUL:                   result = result_64[31:0];
+        `MULH, `MULHSU, `MULHU: result = result_64[63:32];
+        `DIV, `DIVU:            result = sr2 == 0 ? -1 : result_div;
+        `REM, `REMU:            result = sr2 == 0 ? sr1 : result_rem;
+        default:                result = 0;
+        endcase
+    end
 endmodule

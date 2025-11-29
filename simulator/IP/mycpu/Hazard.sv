@@ -69,7 +69,7 @@ module Hazard(
 
     // load-use
     logic stall_by_load_use, flush_by_load_use;
-    wire is_load_ex = mem_access_ex[`LOAD_BIT];
+    wire is_load_ex = mem_access_ex[`LOAD_BIT];     // mem_access  = {2'b01, funct3}
     always_comb begin
         // Lab3 TODO: generate stall_by_load_use and flush_by_load_use
     end

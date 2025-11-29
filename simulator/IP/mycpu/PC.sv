@@ -1,25 +1,23 @@
-module
-    PC #(
-        parameter PC_RST = 32'H80000000
-    )
-    (
-        input                                   clk, rstn,
-        input                   [31 : 0]        pc_next,
-
-        output                  [31 : 0]        pc_cur
-    );
-
-    reg         [31 : 0]        pc;
-
+module PC#(
+    parameter RESET_VALUE = 0
+)(
+    input  logic [ 0:0] clk,
+    input  logic [ 0:0] rstn,
+    input  logic [ 0:0] stall,
+    input  logic [31:0] next_pc,
+    output logic [31:0] pc 
+);
+    logic [31:0] pc_reg;
     initial begin
-        pc = PC_RST;
+        pc_reg = RESET_VALUE;
     end
-
-    always @(posedge clk) begin
-        if(!rstn) pc <= PC_RST;
-        else pc <= pc_next;
+    always_ff @(posedge clk) begin
+        if(!rstn) begin
+            pc_reg <= RESET_VALUE;
+        end 
+        else if(!stall) begin
+            pc_reg <= next_pc;
+        end
     end
-
-    assign pc_cur = pc;
-
+    assign pc = pc_reg;
 endmodule
