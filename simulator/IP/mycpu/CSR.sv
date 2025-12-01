@@ -8,6 +8,7 @@ module CSR(
     input  logic [31:0] wdata,
     output logic [31:0] rdata
     // Lab4 TODO: you need to add some input or output pors to implement CSRs' special functions
+    
 );
     import "DPI-C" function void set_csr_ptr(input logic [31:0] m1 [], input logic [31:0] m2 [], input logic [31:0] m3 [], input logic [31:0] m4 []);
 
@@ -15,32 +16,44 @@ module CSR(
     always_ff @(posedge clk) begin
         if(!rstn) begin
             mstatus <= 32'h0;
+        end else if ((waddr == 12'h300) && we) begin
+            mstatus <= wdata;
+        end else begin
+            mstatus <= mstatus;
         end
-        // Lab4 TODO: implement mstatus
     end
 
     reg [31:0] mtvec;
     always_ff @(posedge clk) begin
         if(!rstn) begin
             mtvec <= 32'h0;
+        end else if (waddr == 12'h305 && we) begin
+            mtvec <= wdata;
+        end else begin
+            mtvec <= mtvec;
         end
-        // Lab4 TODO: implement mtvec
-    end
-
-    reg [31:0] mcause;
-    always_ff @(posedge clk) begin
-        if(!rstn) begin
-            mcause <= 32'h0;
-        end
-        // Lab4 TODO: implement mcause
     end
 
     reg [31:0] mepc;
     always_ff @(posedge clk) begin
         if(!rstn) begin
             mepc <= 32'h0;
+        end else if (waddr == 12'h341 && we) begin
+            mepc <= wdata;
+        end else begin
+            mepc <= mepc;
         end
-        // Lab4 TODO: implement mepc
+    end
+
+    reg [31:0] mcause;
+    always_ff @(posedge clk) begin
+        if(!rstn) begin
+            mcause <= 32'h0;
+        end else if (waddr == 12'h342 && we) begin
+            mcause <= wdata;
+        end else begin
+            mcause <= mcause;
+        end
     end
 
     // read

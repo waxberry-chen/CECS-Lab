@@ -27,13 +27,19 @@ void difftest_step();
 void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
 
 
-uint32_t *cpu_mstatus = NULL, *cpu_mtvec = NULL, *cpu_mepc = NULL, *cpu_mcause = NULL;
+static const char *csr_names[] = {"mstatus", "mtvec", "mepc",  "mcause"};
+// uint32_t *cpu_mstatus = NULL, *cpu_mtvec = NULL, *cpu_mepc = NULL, *cpu_mcause = NULL;
+
 // load the state of your simulated cpu into sim_cpu
+// called in every sim cycle
 void set_state() {
   sim_cpu.pc = dut->pc_cur;
   memcpy(&sim_cpu.gpr[0], cpu_gpr, 4 * 32);
   // Lab4 TODO: set the state of csr to sim_cpu
-  
+  sim_cpu.csr.mstatus = *cpu_csr[CSR_MSTATUS];
+  sim_cpu.csr.mtvec   = *cpu_csr[CSR_MTVEC];
+  sim_cpu.csr.mepc    = *cpu_csr[CSR_MEPC];
+  sim_cpu.csr.mcause  = *cpu_csr[CSR_MCAUSE];
 }
 
 // num of executed instruction
@@ -90,9 +96,9 @@ void cpu_exec(unsigned int n){
   bool npc_cpu_uncache_pre = 0;
   while (n--) {
     #ifdef CONFIG_ITRACE
-    //if(n < CONFIG_ITRACE_MAX_INST){
+    if(n < CONFIG_ITRACE_MAX_INST){
       print_itrace(&inst_log, dut);
-    //}
+    }
     #endif
     
     // execute single instruction
@@ -159,21 +165,26 @@ word_t isa_reg_str2val(const char *s, bool *success) {;
   return 0;
 }
 
+/********** RTL Registers' Interface **********/
 // set cpu_gpr point to your cpu's gpr
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
   cpu_gpr = (uint32_t *)(((VerilatedDpiOpenVar*)r)->datap());
 }
 // set the pointers pint to you cpu's csr
 extern "C" void set_csr_ptr(const svOpenArrayHandle mstatus, const svOpenArrayHandle mtvec, const svOpenArrayHandle mepc, const svOpenArrayHandle mcause) {
-  cpu_mstatus = (uint32_t *)(((VerilatedDpiOpenVar*)mstatus)->datap());
-  cpu_mtvec = (uint32_t *)(((VerilatedDpiOpenVar*)mtvec)->datap());
-  cpu_mepc = (uint32_t *)(((VerilatedDpiOpenVar*)mepc)->datap());
-  cpu_mcause = (uint32_t *)(((VerilatedDpiOpenVar*)mcause)->datap());
+  cpu_csr[CSR_MSTATUS] = (uint32_t *)(((VerilatedDpiOpenVar*)mstatus)->datap());
+  cpu_csr[CSR_MTVEC] = (uint32_t *)(((VerilatedDpiOpenVar*)mtvec)->datap());
+  cpu_csr[CSR_MEPC] = (uint32_t *)(((VerilatedDpiOpenVar*)mepc)->datap());
+  cpu_csr[CSR_MCAUSE] = (uint32_t *)(((VerilatedDpiOpenVar*)mcause)->datap());
 }
+/**********************************************/
 
 void isa_reg_display() {
   for (int i = 0; i < 32; i++) {
     printf("gpr[%d](%s) = 0x%x\n", i, regs[i], cpu_gpr[i]);
+  }
+  for (int i = 0; i < NR_CSR; i++) {
+    printf("csr(%s) = 0x%08x\n", csr_names[i], *cpu_csr[i]);
   }
 }
 

@@ -22,6 +22,15 @@ typedef uint16_t ioaddr_t;
 
 extern uint32_t *cpu_gpr;
 
+enum {
+  CSR_MSTATUS = 0,
+  CSR_MTVEC,
+  CSR_MEPC,
+  CSR_MCAUSE,
+  NR_CSR
+};
+extern uint32_t *cpu_csr [NR_CSR];
+
 #define PAGE_SHIFT        12
 #define PAGE_SIZE         (1ul << PAGE_SHIFT)
 #define PAGE_MASK         (PAGE_SIZE - 1)

@@ -21,6 +21,10 @@ module Hazard(
     input  logic [ 4:0] rf_rs1_id,
     input  logic [ 4:0] rf_rs2_id,
 
+    // privilege commands
+    input  logic [ 0:0] is_priv_ex,
+    input  logic [31:0] pc_ex,
+
     // control hazard
     input  logic [ 0:0] jump,
     input  logic [31:0] jump_target,
@@ -79,13 +83,14 @@ module Hazard(
     // control hazard
     wire flush_by_jump = jump;
     // Lab4 TODO: generate CSR related flush signal
+    wire flush_by_priv = is_priv_ex;
     // Lab4 TODO: generate ecall and mret flush signal
 
     // Lab3 TODO: generate pc_set, IF1_IF2_flush, IF2_ID_flush, ID_EX_flush, EX_LS_flush, LS_WB_flush
-    assign pc_set           = jump;
-    assign IF1_IF2_flush    = jump;
-    assign IF2_ID_flush     = jump;
-    assign ID_EX_flush      = flush_by_load_use || jump;
+    assign pc_set           = flush_by_priv || jump;
+    assign IF1_IF2_flush    = flush_by_priv || jump;
+    assign IF2_ID_flush     = flush_by_priv || jump;
+    assign ID_EX_flush      = flush_by_priv || flush_by_load_use || jump;
     assign EX_LS_flush      = 0;
     assign LS_WB_flush      = 0;    // affect top->pc_cur
 
@@ -101,6 +106,8 @@ module Hazard(
         pc_set_target = jump_target;
         if (flush_by_jump) begin
             pc_set_target = jump_target;
+        end else if (flush_by_priv) begin
+            pc_set_target = pc_ex + 4;
         end
         // Lab4 TODO: generate CSR, ecall and mret related pc_set_target
     end

@@ -85,7 +85,7 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   // Lab3 TODO: implement the regfile check function, return false if any difference, and output some infomation of the difference
   for (int i=0; i < 32; i++) {
     if (sim_cpu.gpr[i] != ref_r->gpr[i]) {
-      printf(ANSI_BG_RED "DIFFTEST: gpr[%d] (%s) = 0x" FMT_WORD " (dut) " 
+      printf(ANSI_BG_RED "DIFFTEST: gpr[%d] (%s) = 0x" FMT_WORD " (dut); 0x" 
       FMT_WORD " (nemu)" ANSI_NONE "\n", i, regs[i], sim_cpu.gpr[i], ref_r->gpr[i]);
       return false;
     }
@@ -93,11 +93,31 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
   // check pc
   // Lab3 TODO: implement the pc check function, return false if any difference, and output some infomation of the difference
   if (sim_cpu.pc != ref_r->pc) {
-    printf(ANSI_BG_RED "DIFFTEST: pc = 0x" FMT_WORD " (dut.pc)" FMT_WORD " (nemu.pc)" ANSI_NONE, sim_cpu.pc, ref_r->pc);
+    printf(ANSI_BG_RED "DIFFTEST: pc = 0x" FMT_WORD " (dut.pc); 0x" FMT_WORD " (nemu.pc)" ANSI_NONE "\n", sim_cpu.pc, ref_r->pc);
     return false;
   }
   const char *csr_names[] = {"mepc", "mstatus", "mcause", "mtvec"};
   // check csr
+  if (sim_cpu.csr.mstatus != ref_r->csr.mstatus) {
+    printf(ANSI_BG_RED "DIFFTEST: csr.%s = 0x" FMT_WORD " (dut); 0x" 
+    FMT_WORD " (nemu)" ANSI_NONE "\n",csr_names[CSR_MSTATUS], sim_cpu.csr.mstatus, ref_r->csr.mstatus);
+    return false;
+  }
+  if (sim_cpu.csr.mtvec != ref_r->csr.mtvec) {
+    printf(ANSI_BG_RED "DIFFTEST: csr.%s = 0x" FMT_WORD " (dut); 0x" 
+    FMT_WORD " (nemu)" ANSI_NONE "\n",csr_names[CSR_MTVEC], sim_cpu.csr.mtvec, ref_r->csr.mtvec);
+    return false;
+  }
+  if (sim_cpu.csr.mepc != ref_r->csr.mepc) {
+    printf(ANSI_BG_RED "DIFFTEST: csr.%s = 0x" FMT_WORD " (dut); 0x" 
+    FMT_WORD " (nemu)" ANSI_NONE "\n",csr_names[CSR_MEPC], sim_cpu.csr.mepc, ref_r->csr.mepc);
+    return false;
+  }
+  if (sim_cpu.csr.mcause != ref_r->csr.mcause) {
+    printf(ANSI_BG_RED "DIFFTEST: csr.%s = 0x" FMT_WORD " (dut); 0x" 
+    FMT_WORD " (nemu)" ANSI_NONE "\n",csr_names[CSR_MCAUSE], sim_cpu.csr.mcause, ref_r->csr.mcause);
+    return false;
+  }
   // Lab4 TODO: (In Lab3, you can ignore this part.)implement the csr check function, return false if any difference, and output some infomation of the difference
   return true;
 }

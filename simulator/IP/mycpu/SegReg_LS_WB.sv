@@ -12,6 +12,8 @@ module SegReg_LS_WB#(
     input  logic [31:0] mem_rdata_ls,
     input  logic [ 0:0] wb_rf_sel_ls,
     input  logic [ 0:0] rf_we_ls,
+    input  logic [ 0:0] csr_we_ls,
+    input  logic [31:0] csr_wdata_ls,
     input  logic [ 0:0] commit_ls,
     input  logic [ 0:0] read_ls,
 
@@ -21,6 +23,8 @@ module SegReg_LS_WB#(
     output logic [31:0] mem_rdata_wb,
     output logic [ 0:0] wb_rf_sel_wb,
     output logic [ 0:0] rf_we_wb,
+    output logic [ 0:0] csr_we_wb,
+    output logic [31:0] csr_wdata_wb,
     output logic [ 0:0] commit_wb,
     output logic [ 0:0] uncache_read_wb
 );
@@ -32,6 +36,8 @@ module SegReg_LS_WB#(
             mem_rdata_wb    <= 32'h0;
             wb_rf_sel_wb    <= 1'h0;
             rf_we_wb        <= 1'h0;
+            csr_we_wb       <= 1'h0;
+            csr_wdata_wb    <= 32'h0;
             commit_wb       <= 1'h0;
             uncache_read_wb <= 1'h0;
         end 
@@ -42,6 +48,8 @@ module SegReg_LS_WB#(
             mem_rdata_wb    <= mem_rdata_ls;
             wb_rf_sel_wb    <= wb_rf_sel_ls;
             rf_we_wb        <= rf_we_ls;
+            csr_we_wb       <= csr_we_ls;
+            csr_wdata_wb    <= csr_wdata_ls;
             commit_wb       <= commit_ls;
             uncache_read_wb <= read_ls && alu_result_ls[31:28] == 4'ha;
         end

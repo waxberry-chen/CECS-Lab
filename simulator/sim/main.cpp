@@ -17,6 +17,8 @@ size_t sim_time = 0;
 CPU_state sim_cpu;
 
 uint32_t *cpu_gpr = NULL;
+uint32_t *cpu_csr[NR_CSR];
+
 // the runing state of simulator
 extern SimState sim_state;
 
@@ -44,7 +46,7 @@ int main(int argc, char** argv, char** env) {
     sdb_mainloop();
     // end
 
-    printf(ANSI_FG_GREEN "Testcase end!\n" ANSI_NONE);
+    printf(ANSI_BG_GREEN "/* Testcase end */" ANSI_NONE "\n");
     
     // close wave trace
     m_trace->close();

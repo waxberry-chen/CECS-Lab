@@ -1,6 +1,7 @@
 `include "./include/config.sv"
 module Decode(
     input  logic [31:0] inst,
+
     output logic [ 4:0] alu_op,
     output logic [ 4:0] mem_access,
     output logic [31:0] imm,
@@ -8,7 +9,10 @@ module Decode(
     output logic [ 1:0] alu_rs1_sel,
     output logic [ 1:0] alu_rs2_sel,
     output logic [ 0:0] wb_rf_sel,
-    output logic [ 4:0] br_type     // check in branch module
+    output logic [ 4:0] br_type,     // check in branch module
+    // CSR signals
+    output logic [ 0:0] csr_we,
+    output logic [ 0:0] is_priv
 );
     // normal decode 
     wire [4:0] rd = inst[11:7];
@@ -25,6 +29,8 @@ module Decode(
             alu_rs2_sel = `SRC2_IMM;
             wb_rf_sel   = `FROM_ALU;
             br_type     = {2'b0, funct3};
+            csr_we      = 1'b0;
+            is_priv     = 1'b0;
         end
         'h17: begin
             // auipc, U_TYPE
@@ -37,6 +43,8 @@ module Decode(
             alu_rs2_sel = `SRC2_IMM;
             wb_rf_sel   = `FROM_ALU;
             br_type     = {2'b0, funct3};
+            csr_we      = 1'b0;
+            is_priv     = 1'b0;
         end
         'h6f: begin
             // jal, J_TYPE
@@ -48,6 +56,8 @@ module Decode(
             alu_rs2_sel = `SRC2_FOUR;
             wb_rf_sel   = `FROM_ALU;
             br_type     = {1'b1, inst[2], inst[3], inst[1:0]};
+            csr_we      = 1'b0;
+            is_priv     = 1'b0;
         end
         'h67: begin
             // jalr, I_TYPE
@@ -60,6 +70,8 @@ module Decode(
             alu_rs2_sel = `SRC2_FOUR;
             wb_rf_sel   = `FROM_ALU;
             br_type     = {1'b1, inst[2], inst[3], inst[1:0]};
+            csr_we      = 1'b0;
+            is_priv     = 1'b0;
         end
         'h63: begin
             // branch, B_TYPE
@@ -71,6 +83,8 @@ module Decode(
             alu_rs2_sel = `SRC2_REG2;
             wb_rf_sel   = `FROM_ALU;
             br_type     = {1'b1, inst[2], funct3};
+            csr_we      = 1'b0;
+            is_priv     = 1'b0;
         end
         'h03: begin
             // load, I_TYPE
@@ -82,6 +96,8 @@ module Decode(
             alu_rs2_sel = `SRC2_IMM;
             wb_rf_sel   = `FROM_MEM;
             br_type     = {1'b0, inst[2], funct3};
+            csr_we      = 1'b0;
+            is_priv     = 1'b0;
         end
         'h23: begin
             // store, S_TYPE
@@ -93,6 +109,8 @@ module Decode(
             alu_rs2_sel = `SRC2_IMM;
             wb_rf_sel   = `FROM_ALU;
             br_type     = {1'b0, inst[2], funct3};
+            csr_we      = 1'b0;
+            is_priv     = 1'b0;
         end
         'h13: begin
             // imm, I_TYPE
@@ -104,6 +122,8 @@ module Decode(
             alu_rs2_sel = `SRC2_IMM;
             wb_rf_sel   = `FROM_ALU;
             br_type     = {1'b0, inst[2], funct3};
+            csr_we      = 1'b0;
+            is_priv     = 1'b0;
         end
         'h33: begin
             // R_TYPE
@@ -116,20 +136,23 @@ module Decode(
             alu_rs2_sel = `SRC2_REG2;
             wb_rf_sel   = `FROM_ALU;
             br_type     = 5'b0;
+            csr_we      = 1'b0;
+            is_priv     = 1'b0;
         end
-        //'h73: begin
+        'h73: begin
             // CSR instruction
             // Lab4 TODO: finish CSR instruction decode
-
-            // imm         = 
-            // mem_access  = 
-            // alu_op      = 
-            // rf_we       = 
-            // alu_rs1_sel = 
-            // alu_rs2_sel = 
-            // wb_rf_sel   = 
-            // br_type     = 
-        //end
+            imm         = {27'b0, inst[19:15]};
+            mem_access  = `NO_ACCESS;
+            alu_op      = `ADD;
+            rf_we       = (|inst[14:12]) & (|rd);
+            alu_rs1_sel = `SRC1_ZERO;
+            alu_rs2_sel = `SRC2_CSR;
+            wb_rf_sel   = `FROM_ALU;
+            br_type     = 5'b0;
+            csr_we      = |inst[14:12];
+            is_priv     = 1'b1;         // is_csr, ecall, mret
+        end
         default: begin
             imm         = 0;
             mem_access  = 0;
@@ -139,6 +162,8 @@ module Decode(
             alu_rs2_sel = 0;
             wb_rf_sel   = 0;
             br_type     = 0;
+            csr_we      = 1'b0;
+            is_priv     = 1'b0;
         end
         endcase
     end
