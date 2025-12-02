@@ -12,12 +12,17 @@ module Decode(
     output logic [ 4:0] br_type,     // check in branch module
     // CSR signals
     output logic [ 0:0] csr_we,
-    output logic [ 0:0] is_priv
+    output logic [ 0:0] is_priv, 
+    output logic [ 0:0] exp_ecall,
+    output logic [ 0:0] exp_mret
 );
     // normal decode 
     wire [4:0] rd = inst[11:7];
     wire [2:0] funct3 = inst[14:12];
     always_comb begin
+        // default
+        exp_ecall = 1'b0;
+        exp_mret = 1'b0;
         case(inst[6:0])
         'h37: begin
             // lui, U_TYPE
@@ -140,8 +145,14 @@ module Decode(
             is_priv     = 1'b0;
         end
         'h73: begin
-            // CSR instruction
-            // Lab4 TODO: finish CSR instruction decode
+            // Exceptions
+            if((inst[31:20] == 12'h000) && (inst[14:12] == 3'h0)) begin
+                exp_ecall = 1'b1;
+            end
+            if((inst[31:20] == 12'h302) && (inst[14:12] == 3'h0)) begin
+                exp_mret = 1'b1;
+            end
+            // CSR instructions
             imm         = {27'b0, inst[19:15]};
             mem_access  = `NO_ACCESS;
             alu_op      = `ADD;
@@ -167,6 +178,5 @@ module Decode(
         end
         endcase
     end
-    // Lab4 TODO: you may need to decode for ecall and mret specially here
 
 endmodule

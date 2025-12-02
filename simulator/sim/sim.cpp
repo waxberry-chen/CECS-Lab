@@ -70,6 +70,7 @@ void reset(int n) {
   dut->eval();
 }
 
+// ** End simulation by software **
 // check if the program should end
 inline bool test_break(){
   return dut->inst == 0x00100073U;

@@ -96,7 +96,7 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {
     printf(ANSI_BG_RED "DIFFTEST: pc = 0x" FMT_WORD " (dut.pc); 0x" FMT_WORD " (nemu.pc)" ANSI_NONE "\n", sim_cpu.pc, ref_r->pc);
     return false;
   }
-  const char *csr_names[] = {"mepc", "mstatus", "mcause", "mtvec"};
+  static const char *csr_names[] = {"mstatus", "mtvec", "mepc",  "mcause"};
   // check csr
   if (sim_cpu.csr.mstatus != ref_r->csr.mstatus) {
     printf(ANSI_BG_RED "DIFFTEST: csr.%s = 0x" FMT_WORD " (dut); 0x" 

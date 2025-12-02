@@ -21,6 +21,8 @@ module SegReg_ID_EX#(
     input  logic [ 0:0] csr_we_id,
     input  logic [31:0] csr_rdata_id,
     input  logic [ 0:0] is_priv_id,
+    input  logic [ 0:0] exp_ecall_id,
+    input  logic [ 0:0] exp_mret_id,
     input  logic [ 0:0] commit_id,
 
     output logic [31:0] pc_ex,
@@ -38,6 +40,8 @@ module SegReg_ID_EX#(
     output logic [ 0:0] csr_we_ex,
     output logic [31:0] csr_rdata_ex,
     output logic [ 0:0] is_priv_ex,
+    output logic [ 0:0] exp_ecall_ex,
+    output logic [ 0:0] exp_mret_ex,
     output logic [ 0:0] commit_ex
 );
     always_ff @(posedge clk) begin
@@ -57,6 +61,8 @@ module SegReg_ID_EX#(
             csr_we_ex       <=  1'h0;
             csr_rdata_ex    <= 32'h0;
             is_priv_ex      <=  1'h0;
+            exp_ecall_ex    <=  1'h0;
+            exp_mret_ex     <=  1'h0;
             commit_ex       <=  1'h0;
         end 
         else if(!stall) begin
@@ -75,6 +81,8 @@ module SegReg_ID_EX#(
             csr_we_ex       <= csr_we_id;
             csr_rdata_ex    <= csr_rdata_id;
             is_priv_ex      <= is_priv_id;
+            exp_ecall_ex    <= exp_ecall_id;
+            exp_mret_ex     <= exp_mret_id;
             commit_ex       <= commit_id;
         end
     end

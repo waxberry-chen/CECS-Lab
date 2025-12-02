@@ -27,6 +27,12 @@ module CPU#(
     logic [ 0:0]    csr_we_id, csr_we_ex, csr_we_ls, csr_we_wb;
     logic [ 0:0]    is_priv_id, is_priv_ex;
     logic [31:0]    priv_rs1;
+    logic [31:0]    mtvec_global, mepc_global;
+    // exceptions
+    logic [ 0:0]    exp_ecall_id, exp_ecall_ex, exp_ecall_ls, exp_ecall_wb;
+    logic [ 0:0]    exp_mret_id, exp_mret_ex, exp_mret_ls, exp_mret_wb;
+    logic [ 0:0]    exp_en_wb;
+    logic [31:0]    ecause_wb;
 
     logic [31:0]    forward1_data, forward2_data;
     logic [31:0]    alu_rf_data1, alu_rf_data2;
@@ -129,7 +135,9 @@ module CPU#(
         .wb_rf_sel      (wb_rf_sel_id),
         .br_type        (br_type_id), 
         .csr_we         (csr_we_id), 
-        .is_priv        (is_priv_id)
+        .is_priv        (is_priv_id), 
+        .exp_ecall      (exp_ecall_id), 
+        .exp_mret       (exp_mret_id)
     );
     Regfile  Regfile_inst (
         .clk            (clk),
@@ -143,13 +151,20 @@ module CPU#(
     );
 
     CSR CSR_inst (
-        .clk        (clk),
-        .rstn       (rstn),
-        .raddr      (inst_id[31:20]),
-        .waddr      (inst_wb[31:20]),
-        .we         (csr_we_wb),
-        .wdata      (csr_wdata_wb),
-        .rdata      (csr_rdata_id)
+        .clk            (clk),
+        .rstn           (rstn),
+        .raddr          (inst_id[31:20]),
+        .waddr          (inst_wb[31:20]),
+        .we             (csr_we_wb),
+        .wdata          (csr_wdata_wb),
+        .rdata          (csr_rdata_id), 
+
+        .exp_en_wb      (exp_en_wb),
+        .pc_wb          (pc_wb),
+        .ecause_wb      (ecause_wb), 
+        .exp_mret_wb    (exp_mret_wb),
+        .mtvec_global   (mtvec_global),
+        .mepc_global    (mepc_global)
     );
 
     /* ID-EX segreg */
@@ -175,6 +190,8 @@ module CPU#(
         .csr_we_id      (csr_we_id),
         .csr_rdata_id   (csr_rdata_id),
         .is_priv_id     (is_priv_id), 
+        .exp_ecall_id   (exp_ecall_id),
+        .exp_mret_id    (exp_mret_id),
 
         .pc_ex          (pc_ex),
         .inst_ex        (inst_ex),
@@ -191,6 +208,8 @@ module CPU#(
         .csr_we_ex      (csr_we_ex),
         .csr_rdata_ex   (csr_rdata_ex),
         .is_priv_ex     (is_priv_ex),
+        .exp_ecall_ex   (exp_ecall_ex),
+        .exp_mret_ex    (exp_mret_ex),
         .commit_id      (commit_id),
         .commit_ex      (commit_ex)
     );
@@ -283,6 +302,8 @@ module CPU#(
         .rf_we_ex       (rf_we_ex),
         .csr_we_ex      (csr_we_ex),
         .csr_wdata_ex   (csr_wdata_ex),
+        .exp_ecall_ex   (exp_ecall_ex),
+        .exp_mret_ex    (exp_mret_ex),
 
         .pc_ls          (pc_ls),
         .inst_ls        (inst_ls),
@@ -292,6 +313,8 @@ module CPU#(
         .rf_we_ls       (rf_we_ls),
         .csr_we_ls      (csr_we_ls),
         .csr_wdata_ls   (csr_wdata_ls),
+        .exp_ecall_ls   (exp_ecall_ls),
+        .exp_mret_ls    (exp_mret_ls),
 
         .commit_ex      (commit_ex),
         .commit_ls      (commit_ls)
@@ -334,6 +357,8 @@ module CPU#(
         .rf_we_ls           (rf_we_ls),
         .csr_we_ls          (csr_we_ls),
         .csr_wdata_ls       (csr_wdata_ls),
+        .exp_ecall_ls       (exp_ecall_ls),
+        .exp_mret_ls        (exp_mret_ls),
 
         .pc_wb              (pc_wb),
         .inst_wb            (inst_wb),
@@ -343,6 +368,8 @@ module CPU#(
         .rf_we_wb           (rf_we_wb),
         .csr_we_wb          (csr_we_wb),
         .csr_wdata_wb       (csr_wdata_wb),
+        .exp_ecall_wb       (exp_ecall_wb),
+        .exp_mret_wb        (exp_mret_wb),
         .commit_ls          (commit_ls),
         .commit_wb          (commit_wb),
         .read_ls            (mem_access_ls[`LOAD_BIT]),
@@ -359,6 +386,12 @@ module CPU#(
         .dout           (rf_wdata_wb)
     );
 
+    Exp_Commit Exp_Commit_inst(
+        .exp_ecall_wb   (exp_ecall_wb),
+        .exp_mret_wb    (exp_mret_wb),
+        .exp_en_wb      (exp_en_wb),
+        .ecause         (ecause_wb)
+    );
 
     /* Hazard */
     Hazard  Hazard_inst (
@@ -381,6 +414,11 @@ module CPU#(
         .rf_rs2_id          (inst_id[24:20]),
         .is_priv_ex         (is_priv_ex),
         .pc_ex              (pc_ex),
+        .exp_ecall_ex       (exp_ecall_ex),         // exp
+        .exp_en_wb          (exp_en_wb),            // exp
+        .exp_mret_ex        (exp_mret_ex),
+        .mtvec_global       (mtvec_global),         // addr jump ecall 
+        .mepc_global        (mepc_global),          // addr back mret
         .jump               (jump),
         .jump_target        (jump_target),
 
