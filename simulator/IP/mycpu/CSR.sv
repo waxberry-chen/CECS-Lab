@@ -8,10 +8,10 @@ module CSR(
     input  logic [31:0] wdata,
     output logic [31:0] rdata,
     // Lab4 TODO: you need to add some input or output pors to implement CSRs' special functions
-    input  logic [ 0:0] exp_en_wb,
     input  logic [31:0] pc_wb,      // write in mepc
     input  logic [31:0] ecause_wb,  // write in mcause
-    input  logic [ 0:0] exp_mret_wb,
+    input  logic [ 2:0] priv_vec_wb,
+    
     output logic [31:0] mtvec_global, 
     output logic [31:0] mepc_global
 );
@@ -24,9 +24,9 @@ module CSR(
             mstatus <= 32'h0;
         end else if ((waddr == 12'h300) && we) begin
             mstatus <= wdata;
-        end else if (exp_en_wb) begin
+        end else if (priv_vec_wb[`ECALL]) begin
             mstatus <= {mstatus[31:12], mstatus[8:0], 3'b110};
-        end else if (exp_mret_wb) begin
+        end else if (priv_vec_wb[`MRET]) begin
             mstatus <= {mstatus[31:12], 3'b001, mstatus[11:3]};
         end else begin
             mstatus <= mstatus;
@@ -52,7 +52,7 @@ module CSR(
             mepc <= 32'h0;
         end else if (waddr == 12'h341 && we) begin
             mepc <= wdata;
-        end else if (exp_en_wb) begin
+        end else if (priv_vec_wb[`ECALL]) begin
             mepc <= pc_wb;
         end else begin
             mepc <= mepc;
@@ -66,7 +66,7 @@ module CSR(
             mcause <= 32'h0;
         end else if (waddr == 12'h342 && we) begin
             mcause <= wdata;
-        end else if (exp_en_wb) begin
+        end else if (priv_vec_wb[`ECALL]) begin
             mcause <= ecause_wb;
         end else begin
             mcause <= mcause;

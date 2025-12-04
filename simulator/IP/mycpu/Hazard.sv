@@ -21,20 +21,15 @@ module Hazard(
     input  logic [ 4:0] rf_rs1_id,
     input  logic [ 4:0] rf_rs2_id,
 
-    // privilege commands
-    input  logic [ 0:0] is_priv_ex,
-    input  logic [31:0] pc_ex,
-
     // control hazard
     input  logic [ 0:0] jump,
     input  logic [31:0] jump_target,
 
-    input  logic [ 0:0] exp_ecall_ex ,         // exp
-    input  logic [ 0:0] exp_en_wb    ,         // exp
-    input  logic [ 0:0] exp_mret_ex  ,
+    input  logic [31:0] pc_ex,
+    input  logic [ 2:0] priv_vec_ex,
+    input  logic [ 2:0] priv_vec_wb,
     input  logic [31:0] mtvec_global ,         // addr jump ecall
     input  logic [31:0] mepc_global  ,
-    // Lab4 TODO: you may need to add some signals to cope with CSR, ecall and mret
 
     output logic [ 0:0] pc_set,
     output logic [ 0:0] IF1_IF2_flush,
@@ -88,11 +83,11 @@ module Hazard(
     // control hazard
     wire flush_by_jump = jump;
     // Lab4 TODO: generate CSR related flush signal
-    wire flush_by_csr = is_priv_ex & ~exp_ecall_ex & ~exp_mret_ex;
+    wire flush_by_csr = priv_vec_ex[`CSR_RW];
     // Lab4 TODO: generate ecall and mret flush signal
-    wire flush_by_ecall_ex = exp_ecall_ex;
-    wire flush_by_ecall    = exp_en_wb;
-    wire flush_by_mret_ex  = exp_mret_ex;
+    wire flush_by_ecall_ex = priv_vec_ex[`ECALL];
+    wire flush_by_ecall    = priv_vec_wb[`ECALL];
+    wire flush_by_mret_ex  = priv_vec_ex[`MRET];
 
     // Lab3 TODO: generate pc_set, IF1_IF2_flush, IF2_ID_flush, ID_EX_flush, EX_LS_flush, LS_WB_flush
     assign pc_set           = flush_by_csr || jump || flush_by_ecall || flush_by_mret_ex;
