@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 module SegReg_IF2_ID#(
     parameter PC_RESET_VAL = 32'h0
 )(
@@ -8,11 +9,10 @@ module SegReg_IF2_ID#(
 
     input  logic [31:0] pc_if2,
     input  logic [31:0] inst_if2,
-    input  logic [ 0:0] commit_if2,
     output logic [31:0] pc_id,
     output logic [31:0] inst_id,
+    input  logic [ 0:0] commit_if2,
     output logic [ 0:0] commit_id
-    
 );
     always_ff @(posedge clk) begin
         if(!rstn || flush) begin

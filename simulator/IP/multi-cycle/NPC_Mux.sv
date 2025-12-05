@@ -1,4 +1,3 @@
-`timescale 1ns/1ps
 module NPC_Mux(
     input  logic [31:0] pc,
     input  logic [ 0:0] pc_set,

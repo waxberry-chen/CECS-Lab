@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 `include "./include/config.sv"
 module DCache_Read_Ctrl(
     input  logic [31:0] mem_rdata,
@@ -5,9 +6,8 @@ module DCache_Read_Ctrl(
     input  logic [ 4:0] mem_access,
     output logic [31:0] rdata
 );
-    wire is_load            = mem_access[`LOAD_BIT];
     wire [2:0] load_type    = mem_access[2:0];
-    wire [31:0] load_data   = mem_rdata;
+    wire [31:0] load_data   = mem_rdata >> {mem_raddr[1:0], 3'b0};
 
     always_comb begin
         case(load_type)

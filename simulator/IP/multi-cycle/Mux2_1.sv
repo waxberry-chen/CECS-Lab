@@ -1,4 +1,3 @@
-`timescale 1ns/1ps
 module Mux2_1#(
     parameter WIDTH = 32
 )(

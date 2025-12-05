@@ -58,16 +58,25 @@
 
 // CSR
 `define CSR_MSTATUS     12'h300
+`define CSR_MIE         12'h304
 `define CSR_MTVEC       12'h305
 `define CSR_MEPC        12'h341
 `define CSR_MCAUSE      12'h342
+`define CSR_MIP         12'h344
 
+// CSR Bits
+`define UIE             0
+`define SIE             1
+`define MIE             3
+`define UPIE            4
+`define SPIE            5
+`define MPIE            7
+`define MTIP            7
+`define MTIE            7
 
 // Privilege Vector
+
 `define CSR_RW          0
 `define ECALL           1
 `define MRET            2
 `define FENCEI          3
-`define FENCE           4
-
-

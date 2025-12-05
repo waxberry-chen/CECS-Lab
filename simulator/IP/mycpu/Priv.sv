@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 module Priv(
     input  logic [ 2:0] csr_op,
     input  logic [31:0] csr_rdata,
@@ -12,17 +13,15 @@ module Priv(
         CSRRWI  = 3'b101,
         CSRRSI  = 3'b110,
         CSRRCI  = 3'b111;
-
     always_comb begin
-        // Lab4 TODO: implement CSR calculate logic
         case(csr_op)
-        CSRRW:     csr_wdata = rf_rdata1;
-        CSRRS:     csr_wdata = csr_rdata | rf_rdata1;
-        CSRRC:     csr_wdata = csr_rdata & ~rf_rdata1;
-        CSRRWI:    csr_wdata = zimm;
-        CSRRSI:    csr_wdata = csr_rdata | zimm;
-        CSRRCI:    csr_wdata = csr_rdata & ~zimm;
-        default:    csr_wdata = 32'b0;
+        CSRRW:   csr_wdata = rf_rdata1;
+        CSRRS:   csr_wdata = csr_rdata | rf_rdata1;
+        CSRRC:   csr_wdata = csr_rdata & ~rf_rdata1;
+        CSRRWI:  csr_wdata = zimm;
+        CSRRSI:  csr_wdata = csr_rdata | zimm;
+        CSRRCI:  csr_wdata = csr_rdata & ~zimm;
+        default: csr_wdata = 0;
         endcase
     end
 endmodule

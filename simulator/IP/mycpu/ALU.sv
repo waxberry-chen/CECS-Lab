@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 `include "./include/config.sv"
 module ALU(
     input  logic [31:0] sr1,
@@ -42,13 +43,13 @@ module ALU(
         `ADD:                   result = sr1 + sr2;
         `SUB:                   result = sr1 - sr2;
         `AND:                   result = sr1 & sr2;
-        `SLT:                   result = ($signed(sr1) < $signed(sr2))? 32'b1: 32'b0;
-        `SLTU:                  result = (sr1 < sr2)? 32'b1: 32'b0;
+        `SLT:                   result = {31'b0, $signed(sr1) < $signed(sr2)};
+        `SLTU:                  result = {31'b0, sr1 < sr2};
         `OR:                    result = sr1 | sr2;
         `XOR:                   result = sr1 ^ sr2;
-        `SLL:                   result = (sr1 << sr2[4:0]);
-        `SRL:                   result = (sr1 >> sr2[4:0]);
-        `SRA:                   result = ($signed(sr1) >>> sr2[4:0]);       
+        `SLL:                   result = sr1 << sr2[4:0];
+        `SRL:                   result = sr1 >> sr2[4:0];
+        `SRA:                   result = $signed(sr1) >>> sr2[4:0];
         `MUL:                   result = result_64[31:0];
         `MULH, `MULHSU, `MULHU: result = result_64[63:32];
         `DIV, `DIVU:            result = sr2 == 0 ? -1 : result_div;

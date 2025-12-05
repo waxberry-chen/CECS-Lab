@@ -1,2 +1,0 @@
-# CECS-pipeline-AXI
-
