@@ -57,10 +57,29 @@ void pmem_read(){
     dut->rvalid = 0;
     if(dut->arvalid){
       // Lab5 TODO: implement the read request
+      rstate = 1;
+      araddr = dut->araddr;
+      assert(araddr >= 0x80000000);
+      arsize = 1 << dut->arsize;
+      arlen = dut->arlen;
+      dut->arready = 1;
+      rcount = 0;
     }
   }
   else if(rstate == 1) {
     // Lab5 TODO: implement the read data
+    dut->arready = 0;
+    dut->rvalid = 1;
+    uint32_t byte_addr = araddr + rcount * arsize;
+    dut->rdata = in_pmem(araddr) ? host_read(guest_to_host(byte_addr), arsize) : mmio_read(byte_addr, arsize);
+    dut->rlast = (rcount == arlen) ? 1 : 0;
+    if(dut->rready) {
+      if (rcount == arlen) {
+        rstate = 0;
+        rcount = 0;
+      }
+      rcount++;
+    }
   }
 }
 uint32_t awaddr = 0;
@@ -85,7 +104,7 @@ void pmem_write(){
     dut->awready = 0;
     if(dut->wvalid){
       uint32_t wdata = (dut->wdata) >> (8 * (awaddr % 4));
-      uint32_t byte_addr = awaddr + wcount * awsize;
+      uint32_t byte_addr = awaddr + wcount * awsize;        // seems that awsize = wlen
       uint32_t wstrb = dut->wstrb;
       uint32_t wlen = 0;
       while(wstrb){

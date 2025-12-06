@@ -82,18 +82,45 @@ module axi_arbiter(
         case(r_crt)
         R_IDLE: begin
             // TODO
+            if (d_rvalid == 1'b1) begin
+                r_nxt = D_AR;
+            end else if (i_rvalid && ~d_rvalid) begin
+                r_nxt = I_AR;
+            end else begin
+                r_nxt = r_crt;
+            end
         end
         I_AR: begin
             // TODO
+            if (arready == 1'b1) begin
+                r_nxt = I_R;
+            end else begin
+                r_nxt = r_crt;
+            end
         end
         I_R: begin
             // TODO
+            if (rvalid && rlast) begin
+                r_nxt = R_IDLE;
+            end else begin
+                r_nxt = r_crt;
+            end
         end
         D_AR: begin
             // TODO
+            if (arready) begin
+                r_nxt = D_R;
+            end else begin
+                r_nxt = r_crt;
+            end
         end
         D_R: begin
             // TODO
+            if (rvalid && rlast) begin
+                r_nxt = R_IDLE;
+            end else begin
+                r_nxt = r_crt;
+            end
         end
         default :                   r_nxt = R_IDLE;    
         endcase
@@ -116,15 +143,29 @@ module axi_arbiter(
         case(r_crt) 
         I_AR: begin
             // TODO
+            arvalid = 1'b1;
+            araddr = i_raddr;
+            arlen = i_rlen;
+            arsize = i_rsize;
         end
         I_R: begin
             // TODO
+            i_rready = rvalid;
+            i_rlast = rlast;
+            rready = 1'b1;
         end
         D_AR: begin
             // TODO
+            arvalid = 1'b1;
+            araddr = d_raddr;
+            arlen = d_rlen;
+            arsize = d_rsize;
         end
         D_R: begin
             // TODO
+            d_rready = rvalid;
+            d_rlast = rlast;
+            rready = 1'b1;
         end
         default:;
         endcase
@@ -143,15 +184,35 @@ module axi_arbiter(
         case(w_crt)
         W_IDLE: begin
             // TODO
+            if (d_wvalid == 1'b1) begin
+                w_nxt = D_AW;
+            end else begin
+                w_nxt = w_crt;
+            end
         end
         D_AW: begin
             // TODO
+            if (awready == 1'b1) begin
+                w_nxt = D_W;
+            end else begin
+                w_nxt = w_crt;
+            end
         end
         D_W: begin
             // TODO
+            if (wready && d_wlast) begin
+                w_nxt = D_B;
+            end else begin
+                w_nxt = w_crt;
+            end
         end
         D_B: begin
             // TODO
+            if (bvalid == 1'b1) begin
+                w_nxt = W_IDLE;
+            end else begin
+                w_nxt = w_crt;
+            end
         end
         default :                   w_nxt = W_IDLE;    
         endcase
@@ -174,12 +235,18 @@ module axi_arbiter(
         case(w_crt)
         D_AW: begin
             // TODO
+            awvalid = 1'b1;
         end
         D_W: begin
             // TODO
+            wvalid = 1'b1;
+            d_wready = wready;
+            wlast = d_wlast;
         end
         D_B: begin
             // TODO
+            d_bvalid = bvalid;
+            bready = d_bready;
         end
         default:;
         endcase
