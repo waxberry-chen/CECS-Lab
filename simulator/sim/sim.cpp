@@ -50,14 +50,14 @@ void single_cycle() {
 // Lab2 TODO: implement the single cycle function of your cpu
   dut->clk = 1;
   dut->eval();
-  // m_trace->dump(sim_time++); 
+  m_trace->dump(sim_time++); 
   dut->clk = 0;
   #ifdef AXI
   pmem_write();
   pmem_read();
   #endif
   dut->eval();
-  // m_trace->dump(sim_time++); 
+  m_trace->dump(sim_time++); 
   if(dut->commit_wb == 1) set_state();
 }
 
@@ -100,9 +100,9 @@ void cpu_exec(unsigned int n){
   bool npc_cpu_uncache_pre = 0;
   while (n--) {
     #ifdef CONFIG_ITRACE
-    //if(n < CONFIG_ITRACE_MAX_INST){
+    if(n < CONFIG_ITRACE_MAX_INST){
       print_itrace(&inst_log, dut);
-    //}
+    }
     #endif
     
     // execute single instruction

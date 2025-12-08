@@ -71,7 +71,9 @@ void pmem_read(){
     dut->arready = 0;
     dut->rvalid = 1;
     uint32_t byte_addr = araddr + rcount * arsize;
-    dut->rdata = in_pmem(araddr) ? host_read(guest_to_host(byte_addr), arsize) : mmio_read(byte_addr, arsize);
+    uint32_t raw_data = in_pmem(araddr) ? host_read(guest_to_host(byte_addr), arsize) : mmio_read(byte_addr, arsize);
+    int shift = (byte_addr%4)*8;
+    dut->rdata = raw_data << shift;
     dut->rlast = (rcount == arlen) ? 1 : 0;
     if(dut->rready) {
       if (rcount == arlen) {
